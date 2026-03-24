@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PUBLIC
+  SUBSCRIBER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  INACTIVE
+  CANCELLED
+  LAPSED
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  YEARLY
+}
+
+enum DrawStatus {
+  PENDING
+  SIMULATED
+  PUBLISHED
+}
+
+enum DrawType {
+  RANDOM
+  ALGORITHMIC
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                String       @id @default(uuid())
+  supabaseId        String       @unique @map("supabase_id")
+  email             String       @unique
+  name              String?
+  avatarUrl         String?      @map("avatar_url")
+  role              Role         @default(PUBLIC)
+  createdAt         DateTime     @default(now()) @map("created_at")
+  updatedAt         DateTime     @updatedAt @map("updated_at")
+
+  subscription      Subscription?
+  scores            Score[]
+  charitySelection  CharitySelection?
+  drawEntries       DrawEntry[]
+  winnings          Winner[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id               String             @id @default(uuid())
+  userId           String             @unique @map("user_id")
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String?            @unique @map("stripe_customer_id")
+  stripeSubId      String?            @unique @map("stripe_subscription_id")
+  plan             SubscriptionPlan
+  status           SubscriptionStatus @default(INACTIVE)
+  currentPeriodEnd DateTime?          @map("current_period_end")
+  cancelAtPeriodEnd Boolean           @default(false) @map("cancel_at_period_end")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
+
+  @@map("subscriptions")
+}
+
+model Score {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value     Int      // 1–45 Stableford
+  datePlayed DateTime @map("date_played")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("scores")
+}
+
+model Charity {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String
+  logoUrl     String?  @map("logo_url")
+  imageUrl    String?  @map("image_url")
+  website     String?
+  featured    Boolean  @default(false)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  selections  CharitySelection[]
+  events      CharityEvent[]
+
+  @@map("charities")
+}
+
+model CharityEvent {
+  id          String   @id @default(uuid())
+  charityId   String   @map("charity_id")
+  charity     Charity  @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  eventDate   DateTime @map("event_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("charity_events")
+}
+
+model CharitySelection {
+  id                  String   @id @default(uuid())
+  userId              String   @unique @map("user_id")
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charityId           String   @map("charity_id")
+  charity             Charity  @relation(fields: [charityId], references: [id])
+  contributionPercent Float    @default(10) @map("contribution_percent") // min 10%
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@map("charity_selections")
+}
+
+model Draw {
+  id          String     @id @default(uuid())
+  month       Int        // 1–12
+  year        Int
+  type        DrawType   @default(RANDOM)
+  status      DrawStatus @default(PENDING)
+  drawnNumbers Int[]     @map("drawn_numbers")
+  publishedAt DateTime?  @map("published_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  prizePool   PrizePool?
+  entries     DrawEntry[]
+  winners     Winner[]
+
+  @@unique([month, year])
+  @@map("draws")
+}
+
+model PrizePool {
+  id                String   @id @default(uuid())
+  drawId            String   @unique @map("draw_id")
+  draw              Draw     @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  totalAmount       Float    @map("total_amount")
+  fiveMatchAmount   Float    @map("five_match_amount")    // 40%
+  fourMatchAmount   Float    @map("four_match_amount")    // 35%
+  threeMatchAmount  Float    @map("three_match_amount")   // 25%
+  jackpotRollover   Float    @default(0) @map("jackpot_rollover")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("prize_pools")
+}
+
+model DrawEntry {
+  id        String   @id @default(uuid())
+  drawId    String   @map("draw_id")
+  draw      Draw     @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  numbers   Int[]    // the 5 scores used
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([drawId, userId])
+  @@map("draw_entries")
+}
+
+model Winner {
+  id                 String             @id @default(uuid())
+  drawId             String             @map("draw_id")
+  draw               Draw               @relation(fields: [drawId], references: [id], onDelete: Cascade)
+  userId             String             @map("user_id")
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchCount         Int                @map("match_count") // 3, 4, or 5
+  prizeAmount        Float              @map("prize_amount")
+  paymentStatus      PaymentStatus      @default(PENDING) @map("payment_status")
+  verificationStatus VerificationStatus @default(PENDING) @map("verification_status")
+  proofUrl           String?            @map("proof_url")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  @@map("winners")
+}
