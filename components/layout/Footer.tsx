@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TreePine } from "lucide-react";
+import { TreePine, Mail } from "lucide-react";
 
 function GithubIcon() {
   return (
@@ -17,58 +17,119 @@ function LinkedInIcon() {
   );
 }
 
+const PLATFORM_LINKS = [
+  { href: "/dashboard",  label: "Dashboard"     },
+  { href: "/draws",      label: "Monthly Draws" },
+  { href: "/charities",  label: "Charities"     },
+  { href: "/subscribe",  label: "Subscribe"     },
+];
+
+const COMPANY_LINKS = [
+  { href: "/about",   label: "About"           },
+  { href: "/privacy", label: "Privacy Policy"  },
+  { href: "/terms",   label: "Terms of Service"},
+  { href: "/contact", label: "Contact"         },
+];
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-card">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <TreePine className="w-4 h-4 text-white" strokeWidth={1.8} />
+
+      <div className="rule-gradient" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
+
+
+          <div className="md:col-span-2 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md"
+                style={{ boxShadow: "0 2px 8px color-mix(in srgb, #0a7c4d 30%, transparent)" }}
+              >
+                <TreePine className="w-4.5 h-4.5 text-white" strokeWidth={1.8} />
               </div>
-              <span className="font-display font-semibold text-foreground">Sylva Vault</span>
+              <span className="font-display font-semibold text-foreground text-lg">Sylva Vault</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Golf meets generosity. Track your scores, win monthly prizes, and give back to causes that matter.
+              Golf meets generosity. Track your Stableford scores, enter monthly prize draws, and give back to the causes you care about most.
             </p>
+
+
+            <a
+              href="mailto:kumar_singh_iot@vips.edu"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-muted text-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-200 group"
+            >
+              <Mail className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
+              kumar_singh_iot@vips.edu
+            </a>
+
+
+            <div className="flex items-center gap-3 pt-1">
+              <a
+                href="https://github.com/4nshumankrsingh"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                className="w-9 h-9 rounded-xl border border-border bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 hover:-translate-y-0.5"
+              >
+                <GithubIcon />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/anshuman-kumar-singh-078b01316/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                className="w-9 h-9 rounded-xl border border-border bg-muted flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 hover:-translate-y-0.5"
+              >
+                <LinkedInIcon />
+              </a>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:col-span-2">
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-foreground">Platform</h4>
-              {[
-                { href: "/dashboard", label: "Dashboard" },
-                { href: "/draws", label: "Monthly Draws" },
-                { href: "/charities", label: "Charities" },
-                { href: "/subscribe", label: "Subscribe" },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href} className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {label}
-                </Link>
+
+
+          <div className="space-y-4">
+            <h4 className="text-xs font-semibold text-foreground tracking-widest uppercase">Platform</h4>
+            <ul className="space-y-2.5">
+              {PLATFORM_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                </li>
               ))}
-            </div>
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-foreground">Company</h4>
-              {[
-                { href: "/about", label: "About" },
-                { href: "/privacy", label: "Privacy Policy" },
-                { href: "/terms", label: "Terms of Service" },
-                { href: "/contact", label: "Contact" },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href} className="block text-sm text-muted-foreground hover:text-primary transition-colors">
-                  {label}
-                </Link>
+            </ul>
+          </div>
+
+
+          <div className="space-y-4">
+            <h4 className="text-xs font-semibold text-foreground tracking-widest uppercase">Company</h4>
+            <ul className="space-y-2.5">
+              {COMPANY_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
+                  >
+                    {label}
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+
+
+        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Sylva Vault. All rights reserved.
           </p>
-          <div className="flex items-center gap-3">
-            <a href="https://github.com/4nshumankrsingh" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="GitHub"><GithubIcon /></a>
-            <a href="https://www.linkedin.com/in/anshuman-kumar-singh-078b01316/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors" aria-label="LinkedIn"><LinkedInIcon /></a>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span>Built with</span>
+            <span className="text-primary">♥</span>
+            <span>for golfers who give back</span>
           </div>
         </div>
       </div>

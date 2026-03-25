@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap");
 
 @import "tailwindcss";
 
@@ -34,32 +34,42 @@
 
 :root {
   color-scheme: light;
-  --bg: #f8faf9;
-  --fg: #0d1f16;
+  --bg: #f4f8f6;
+  --fg: #0a1a12;
   --card-bg: #ffffff;
-  --card-fg: #0d1f16;
-  --border: #d6e8de;
-  --muted: #f0f5f2;
-  --muted-fg: #5a7a68;
+  --card-fg: #0a1a12;
+  --border: #cce4d8;
+  --muted: #edf4f0;
+  --muted-fg: #527a65;
   --primary: #0a7c4d;
   --accent: #00b4d8;
-  --mesh-1: radial-gradient(ellipse 80% 60% at 10% 0%, #d6f0e420 0%, transparent 70%);
-  --mesh-2: radial-gradient(ellipse 60% 50% at 90% 100%, #90e0ef18 0%, transparent 70%);
+  --mesh-1: radial-gradient(ellipse 90% 70% at 5% 0%, #b7e8d140 0%, transparent 60%);
+  --mesh-2: radial-gradient(ellipse 70% 60% at 95% 100%, #90e0ef28 0%, transparent 60%);
+  --mesh-3: radial-gradient(ellipse 50% 40% at 50% 50%, #0a7c4d08 0%, transparent 70%);
+  --shadow-card: 0 1px 3px rgba(10,122,77,0.06), 0 8px 24px rgba(10,122,77,0.08);
+  --shadow-card-hover: 0 4px 12px rgba(10,122,77,0.12), 0 20px 48px rgba(10,122,77,0.16);
+  --shadow-primary: 0 4px 14px color-mix(in srgb, #0a7c4d 30%, transparent);
+  --shadow-primary-hover: 0 8px 24px color-mix(in srgb, #0a7c4d 42%, transparent);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #080f0b;
-  --fg: #e8f5ee;
-  --card-bg: #0f1a13;
-  --card-fg: #e8f5ee;
-  --border: #1c3326;
-  --muted: #111d16;
-  --muted-fg: #6aad88;
+  --bg: #060e09;
+  --fg: #e2f0e8;
+  --card-bg: #0c1810;
+  --card-fg: #e2f0e8;
+  --border: #163324;
+  --muted: #0f1d14;
+  --muted-fg: #5fa87a;
   --primary: #0d9e62;
   --accent: #00b4d8;
-  --mesh-1: radial-gradient(ellipse 80% 60% at 10% 0%, #0a7c4d22 0%, transparent 70%);
-  --mesh-2: radial-gradient(ellipse 60% 50% at 90% 100%, #00b4d818 0%, transparent 70%);
+  --mesh-1: radial-gradient(ellipse 90% 70% at 5% 0%, #0a7c4d30 0%, transparent 60%);
+  --mesh-2: radial-gradient(ellipse 70% 60% at 95% 100%, #00b4d820 0%, transparent 60%);
+  --mesh-3: radial-gradient(ellipse 50% 40% at 50% 50%, #0d9e6212 0%, transparent 70%);
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-card-hover: 0 4px 12px rgba(13,158,98,0.18), 0 20px 48px rgba(0,0,0,0.55);
+  --shadow-primary: 0 4px 14px color-mix(in srgb, #0d9e62 35%, transparent);
+  --shadow-primary-hover: 0 8px 28px color-mix(in srgb, #0d9e62 48%, transparent);
 }
 
 *,
@@ -72,6 +82,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -79,15 +90,11 @@ body {
   color: var(--fg);
   font-family: var(--font-sans);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
-.font-display {
-  font-family: var(--font-display);
-}
-
-.font-sans {
-  font-family: var(--font-sans);
-}
+.font-display { font-family: var(--font-display); }
+.font-sans { font-family: var(--font-sans); }
 
 .text-gradient {
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
@@ -97,125 +104,122 @@ body {
 }
 
 .bg-mesh-gradient {
-  background-image: var(--mesh-1), var(--mesh-2);
+  background-image: var(--mesh-1), var(--mesh-2), var(--mesh-3);
   background-color: transparent;
 }
 
 .glass {
-  background: color-mix(in srgb, var(--card-bg) 80%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  background: color-mix(in srgb, var(--card-bg) 75%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.card-elevated {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.35s ease, transform 0.35s ease, border-color 0.35s ease;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+.card-elevated:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
 }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 9999px;
+.rule-gradient {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+  border: none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-fg);
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--primary) 50%, var(--border)); }
 
 :focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 4px;
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--primary) 25%, transparent);
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
   color: var(--fg);
 }
 
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 30%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 8px transparent;
-  }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primary) 35%, transparent); }
+  50% { box-shadow: 0 0 0 12px transparent; }
 }
 
 @keyframes shimmer {
-  from {
-    background-position: -200% center;
-  }
-  to {
-    background-position: 200% center;
-  }
+  from { background-position: -200% center; }
+  to { background-position: 200% center; }
 }
 
-.animate-fade-up {
-  animation: fade-up 0.5s ease both;
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(1deg); }
+  66% { transform: translateY(-5px) rotate(-1deg); }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.4s ease both;
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(28px) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.stagger > *:nth-child(1) {
-  animation-delay: 0ms;
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.stagger > *:nth-child(2) {
-  animation-delay: 80ms;
-}
+.animate-fade-up { animation: fade-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-fade-in { animation: fade-in 0.5s ease both; }
+.animate-scale-in { animation: scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+.animate-float { animation: float 5s ease-in-out infinite; }
+.animate-slide-in-right { animation: slide-in-right 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-.stagger > *:nth-child(3) {
-  animation-delay: 160ms;
-}
-
-.stagger > *:nth-child(4) {
-  animation-delay: 240ms;
-}
-
-.stagger > *:nth-child(5) {
-  animation-delay: 320ms;
-}
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 110ms; }
+.stagger > *:nth-child(3) { animation-delay: 220ms; }
+.stagger > *:nth-child(4) { animation-delay: 330ms; }
+.stagger > *:nth-child(5) { animation-delay: 440ms; }
+.stagger > *:nth-child(6) { animation-delay: 550ms; }
 
 .skeleton {
   background: linear-gradient(
     90deg,
     var(--muted) 25%,
-    color-mix(in srgb, var(--muted-fg) 15%, var(--muted)) 50%,
+    color-mix(in srgb, var(--muted-fg) 12%, var(--muted)) 50%,
     var(--muted) 75%
   );
   background-size: 200% auto;
-  animation: shimmer 1.5s linear infinite;
+  animation: shimmer 1.8s linear infinite;
   border-radius: var(--radius-md);
 }
