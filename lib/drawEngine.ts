@@ -77,7 +77,7 @@ export async function generateAlgorithmicNumbers(): Promise<number[]> {
 
   const frequency: Record<number, number> = {};
   for (let i = 1; i <= 45; i++) frequency[i] = 0;
-  scores.forEach(s => { frequency[s.value] = (frequency[s.value] || 0) + 1; });
+  scores.forEach((s: { value: number }) => { frequency[s.value] = (frequency[s.value] || 0) + 1; });
 
   // Rarer scores get higher weight
   const maxFreq     = Math.max(...Object.values(frequency)) + 1;
@@ -159,11 +159,11 @@ export async function simulateDraw(
   });
 
   const entries: EntryResult[] = subscribers
-    .filter(u => u.scores.length >= 3)
-    .map(u => ({
+    .filter((u: any) => u.scores.length >= 3)
+    .map((u: any) => ({
       userId:     u.id,
-      numbers:    u.scores.map(s => s.value),
-      matchCount: countMatches(u.scores.map(s => s.value), drawnNumbers),
+      numbers:    u.scores.map((s: any) => s.value),
+      matchCount: countMatches(u.scores.map((s: any) => s.value), drawnNumbers),
     }));
 
   const pool = await calculatePrizePool(rollover);
@@ -189,7 +189,7 @@ export async function runOfficialDraw(
 
   const result = await simulateDraw(month, year, type, rollover);
 
-  await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx: any) => {
     const draw = await tx.draw.upsert({
       where:  { month_year: { month, year } },
       create: {

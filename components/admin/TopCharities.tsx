@@ -13,7 +13,7 @@ export async function TopCharities() {
         Top Charities by Supporters
       </h2>
       <div className="space-y-3">
-        {charities.map((charity) => (
+        {charities.map((charity: any) => (
           <div
             key={charity.id}
             className="flex justify-between items-center py-2 border-b border-border last:border-0"
