@@ -5,13 +5,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { updateUserRole, updateSubscriptionStatus } from "@/lib/actions/admin/users";
 
 interface User {
@@ -69,31 +69,29 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
           </div>
           <div>
             <Label>Role</Label>
-            <Select value={role} onValueChange={setRole}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PUBLIC">Public</SelectItem>
-                <SelectItem value="SUBSCRIBER">Subscriber</SelectItem>
-                <SelectItem value="ADMIN">Admin</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="PUBLIC">Public</option>
+              <option value="SUBSCRIBER">Subscriber</option>
+              <option value="ADMIN">Admin</option>
+            </select>
           </div>
           {user.subscription && (
             <div>
               <Label>Subscription Status</Label>
-              <Select value={subStatus} onValueChange={setSubStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                  <SelectItem value="LAPSED">Lapsed</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                value={subStatus}
+                onChange={(e) => setSubStatus(e.target.value)}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
+                <option value="CANCELLED">Cancelled</option>
+                <option value="LAPSED">Lapsed</option>
+              </select>
             </div>
           )}
           <div className="flex justify-end gap-3 pt-4">

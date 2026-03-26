@@ -4,13 +4,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, RefreshCw, Play } from "lucide-react";
@@ -79,15 +79,14 @@ export function DrawConfig() {
           </div>
           <div>
             <Label>Draw Type</Label>
-            <Select value={drawType} onValueChange={(v: any) => setDrawType(v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="RANDOM">Random</SelectItem>
-                <SelectItem value="ALGORITHMIC">Algorithmic (weighted)</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={drawType}
+              onChange={(e) => setDrawType(e.target.value as any)}
+              className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <option value="RANDOM">Random</option>
+              <option value="ALGORITHMIC">Algorithmic (weighted)</option>
+            </select>
           </div>
         </div>
 
