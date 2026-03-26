@@ -29,6 +29,7 @@ interface User {
   subscription: {
     status: string;
     plan: string;
+    id: string;
   } | null;
   scores: {
     id: string;
@@ -78,7 +79,7 @@ export function UserTable({ users }: { users: User[] }) {
               <TableHead>Role</TableHead>
               <TableHead>Subscription</TableHead>
               <TableHead>Scores</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+              <TableHead className="w-20">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -18,7 +18,7 @@ interface User {
   id: string;
   email: string;
   name: string | null;
-  role: string;
+  role: "PUBLIC" | "SUBSCRIBER" | "ADMIN";
   subscription: {
     status: string;
     plan: string;
@@ -33,7 +33,7 @@ interface EditUserModalProps {
 }
 
 export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) {
-  const [role, setRole] = useState(user.role);
+  const [role, setRole] = useState<"PUBLIC" | "SUBSCRIBER" | "ADMIN">(user.role);
   const [subStatus, setSubStatus] = useState(user.subscription?.status || "INACTIVE");
   const [loading, setLoading] = useState(false);
 
@@ -71,7 +71,7 @@ export function EditUserModal({ user, open, onOpenChange }: EditUserModalProps) 
             <Label>Role</Label>
             <select
               value={role}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e) => setRole(e.target.value as "PUBLIC" | "SUBSCRIBER" | "ADMIN")}
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="PUBLIC">Public</option>
