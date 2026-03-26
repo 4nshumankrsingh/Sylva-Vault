@@ -16,8 +16,8 @@ export default async function CharitiesPage() {
     },
   });
 
-  const featured = charities.filter(c => c.featured);
-  const rest     = charities.filter(c => !c.featured);
+  const featured = charities.filter((c: any) => c.featured);
+  const rest     = charities.filter((c: any) => !c.featured);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -44,7 +44,7 @@ export default async function CharitiesPage() {
               <h2 className="text-sm font-semibold text-foreground uppercase tracking-widest">Featured</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 stagger">
-              {featured.map((charity, i) => (
+              {featured.map((charity: any, i: number) => (
                 <div
                   key={charity.id}
                   className="card-elevated p-7 space-y-5 animate-fade-up relative overflow-hidden"
@@ -69,7 +69,7 @@ export default async function CharitiesPage() {
                   {charity.events.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-xs font-semibold text-foreground uppercase tracking-wide">Upcoming Events</p>
-                      {charity.events.map(ev => (
+                      {charity.events.map((ev: any) => (
                         <div key={ev.id} className="flex items-center gap-2.5 text-sm">
                           <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                           <span className="text-foreground">{ev.title}</span>
@@ -102,7 +102,7 @@ export default async function CharitiesPage() {
           <div className="space-y-6">
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-widest">All Charities</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 stagger">
-              {rest.map((charity, i) => (
+              {rest.map((charity: any, i: number) => (
                 <div
                   key={charity.id}
                   className="card-elevated p-6 space-y-4 animate-fade-up"

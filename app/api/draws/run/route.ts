@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Fire-and-forget emails — do not block the response
     Promise.allSettled(
-      subscribers.map((sub) => {
+      subscribers.map((sub: any) => {
         const winnerRecord = winnerMap.get(sub.id);
         return sendDrawResultsEmail({
           to:           sub.email,

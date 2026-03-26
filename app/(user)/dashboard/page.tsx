@@ -63,7 +63,7 @@ export default async function DashboardPage() {
 
   const charities    = await prisma.charity.findMany({ where: { active: true }, orderBy: { name: "asc" } });
   const isSubscriber = dbUser.subscription?.status === "ACTIVE";
-  const totalWon     = dbUser.winnings.reduce((acc, w) => acc + w.prizeAmount, 0);
+  const totalWon     = dbUser.winnings.reduce((acc: number, w: any) => acc + w.prizeAmount, 0);
 
   const now      = new Date();
   const nextDraw = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
             </div>
             <div className="rule-gradient" />
             <ScoreEntryForm
-              scores={dbUser.scores.map(s => ({ ...s, datePlayed: new Date(s.datePlayed) }))}
+              scores={dbUser.scores.map((s: any) => ({ ...s, datePlayed: new Date(s.datePlayed) }))}
               canAdd={isSubscriber}
             />
           </div>
@@ -211,7 +211,7 @@ export default async function DashboardPage() {
                   <div>
                     <p className="text-sm font-medium text-foreground">Entered in next draw</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Your numbers: {dbUser.scores.map(s => s.value).join(", ")}
+                      Your numbers: {dbUser.scores.map((s: any) => s.value).join(", ")}
                     </p>
                   </div>
                 </div>
@@ -241,7 +241,7 @@ export default async function DashboardPage() {
               <h2 className="font-display font-semibold text-foreground">Winnings</h2>
             </div>
             <div className="rule-gradient" />
-            <WinningsSection winnings={dbUser.winnings.map(w => ({
+            <WinningsSection winnings={dbUser.winnings.map((w: any) => ({
               id:                 w.id,
               matchCount:         w.matchCount,
               prizeAmount:        w.prizeAmount,

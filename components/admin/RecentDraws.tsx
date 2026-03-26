@@ -13,7 +13,7 @@ export async function RecentDraws() {
         Recent Draws
       </h2>
       <div className="space-y-3">
-        {draws.map((draw) => (
+        {draws.map((draw: any) => (
           <div
             key={draw.id}
             className="flex justify-between items-center py-2 border-b border-border last:border-0"

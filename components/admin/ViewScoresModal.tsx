@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Trash2, Plus } from "lucide-react";
-import { addScore, deleteScore } from "@/lib/actions/scores"; // Reuse user actions but need admin permissions
+import { addScoreAdmin, deleteScoreAdmin } from "@/lib/actions/admin/users";
 
 interface User {
   id: string;
@@ -28,7 +28,7 @@ export function ViewScoresModal({ user, open, onOpenChange }: { user: User; open
     if (isNaN(num) || num < 1 || num > 45) return;
     setLoading(true);
     try {
-      await addScore(num, new Date(date), user.id); // Need to extend addScore to accept userId for admin
+      await addScoreAdmin(num, new Date(date), user.id);
       // Refresh or update scores
     } catch (error) {
       console.error(error);
@@ -41,7 +41,7 @@ export function ViewScoresModal({ user, open, onOpenChange }: { user: User; open
   const handleDeleteScore = async (scoreId: string) => {
     setLoading(true);
     try {
-      await deleteScore(scoreId, user.id);
+      await deleteScoreAdmin(scoreId, user.id);
     } catch (error) {
       console.error(error);
     } finally {

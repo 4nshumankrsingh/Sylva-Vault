@@ -60,10 +60,10 @@ export default async function DrawsPage() {
           </div>
         ) : (
           <div className="space-y-5 stagger">
-            {draws.map((draw, i) => {
-              const fiveWinners  = draw.winners.filter(w => w.matchCount === 5);
-              const fourWinners  = draw.winners.filter(w => w.matchCount === 4);
-              const threeWinners = draw.winners.filter(w => w.matchCount === 3);
+            {draws.map((draw: any, i: number) => {
+              const fiveWinners  = draw.winners.filter((w: any) => w.matchCount === 5);
+              const fourWinners  = draw.winners.filter((w: any) => w.matchCount === 4);
+              const threeWinners = draw.winners.filter((w: any) => w.matchCount === 3);
               const jackpotRolled = fiveWinners.length === 0;
 
               return (
@@ -118,7 +118,7 @@ export default async function DrawsPage() {
 
                   {/* Drawn numbers */}
                   <div className="flex flex-wrap gap-2">
-                    {draw.drawnNumbers.map((n, idx) => (
+                    {draw.drawnNumbers.map((n: any, idx: number) => (
                       <div
                         key={idx}
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-display font-bold text-white"
@@ -179,7 +179,7 @@ export default async function DrawsPage() {
                             </span>
                             <span className="text-muted-foreground">·</span>
                             <span className="text-muted-foreground">
-                              {list.map(w => w.user.name ?? "Anonymous").join(", ")}
+                              {list.map((w: any) => w.user.name ?? "Anonymous").join(", ")}
                             </span>
                           </div>
                           {prize && (
