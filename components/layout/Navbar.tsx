@@ -13,29 +13,44 @@ import {
   LogOut,
   ChevronRight,
   User,
+  ShieldCheck,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { createClient } from "@/lib/supabase";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
+import type { AuthChangeEvent, Session, User as SupabaseUser, UserResponse } from "@supabase/supabase-js";
 
+// All possible nav links — filtered by auth + role at render time
 const NAV_LINKS = [
-  { href: "/draws",     label: "Draws",     icon: Trophy,          auth: false },
-  { href: "/charities", label: "Charities", icon: Heart,           auth: false },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, auth: true  },
+  { href: "/draws",     label: "Draws",     icon: Trophy,          auth: false, adminOnly: false },
+  { href: "/charities", label: "Charities", icon: Heart,           auth: false, adminOnly: false },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, auth: true,  adminOnly: false },
+  { href: "/admin",     label: "Admin",     icon: ShieldCheck,     auth: true,  adminOnly: true  },
 ];
 
-export function Navbar() {
-  const pathname  = usePathname();
-  const supabase  = createClient();
+interface NavbarProps {
+  // Passed in from NavbarServer (server component) so we know role on first paint
+  // without an extra client-side fetch
+  initialRole?: "PUBLIC" | "SUBSCRIBER" | "ADMIN";
+}
+
+export function Navbar({ initialRole = "PUBLIC" }: NavbarProps) {
+  const pathname = usePathname();
+  const supabase = createClient();
 
   const [user,       setUser]       = useState<SupabaseUser | null>(null);
+  const [role,       setRole]       = useState<"PUBLIC" | "SUBSCRIBER" | "ADMIN">(initialRole);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled,   setScrolled]   = useState(false);
 
+  // Sync auth state on client (handles login/logout without page reload)
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) =>
-      setUser(session?.user ?? null)
+    supabase.auth.getUser().then((res: UserResponse) => setUser(res.data?.user ?? null));
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        setUser(session?.user ?? null);
+        // When user logs out, reset role to PUBLIC immediately
+        if (!session?.user) setRole("PUBLIC");
+      }
     );
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -46,15 +61,24 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile nav on route change
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   async function handleLogout() {
     await supabase.auth.signOut();
+    setRole("PUBLIC");
     window.location.href = "/";
   }
 
-  const visibleLinks = NAV_LINKS.filter((l) => !l.auth || user);
+  // Filter links:
+  // - auth:true  → only show when logged in
+  // - adminOnly  → only show when role === ADMIN
+  const visibleLinks = NAV_LINKS.filter((l) => {
+    if (l.adminOnly) return role === "ADMIN";
+    if (l.auth)      return !!user;
+    return true;
+  });
+
+  const isAdmin = role === "ADMIN";
 
   return (
     <>
@@ -69,7 +93,8 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="relative w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+            <div
+              className="relative w-9 h-9 rounded-xl bg-primary flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
               style={{ boxShadow: "0 2px 8px color-mix(in srgb, #0a7c4d 30%, transparent)" }}
             >
               <TreePine className="w-4.5 h-4.5 text-white" strokeWidth={1.8} />
@@ -79,24 +104,28 @@ export function Navbar() {
             </span>
           </Link>
 
-
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
-            {visibleLinks.map(({ href, label, icon: Icon }) => {
+            {visibleLinks.map(({ href, label, icon: Icon, adminOnly }) => {
               const active = pathname.startsWith(href);
               return (
                 <Link
                   key={href}
                   href={href}
                   className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    active
-                      ? "text-primary bg-primary/8"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    adminOnly
+                      ? active
+                        ? "text-amber-600 bg-amber-500/10"
+                        : "text-amber-600/70 hover:text-amber-600 hover:bg-amber-500/10"
+                      : active
+                        ? "text-primary bg-primary/8"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   {label}
                   {active && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${adminOnly ? "bg-amber-500" : "bg-primary"}`} />
                   )}
                 </Link>
               );
@@ -109,6 +138,13 @@ export function Navbar() {
 
             {user ? (
               <div className="hidden md:flex items-center gap-2">
+                {/* Role badge — only shown for admin/subscriber */}
+                {isAdmin && (
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-600 text-xs font-semibold border border-amber-500/20">
+                    <ShieldCheck className="w-3 h-3" />
+                    Admin
+                  </span>
+                )}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-muted border border-border text-sm text-muted-foreground">
                   <User className="w-3.5 h-3.5" />
                   <span className="max-w-30 truncate">
@@ -141,20 +177,16 @@ export function Navbar() {
               </div>
             )}
 
-
+            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Toggle menu"
               className="md:hidden w-9 h-9 rounded-xl border border-border bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all duration-200"
             >
-              <span
-                className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90"}`}
-              >
+              <span className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100 rotate-0" : "opacity-0 rotate-90"}`}>
                 <X className="w-4 h-4" />
               </span>
-              <span
-                className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-0 -rotate-90" : "opacity-100 rotate-0"}`}
-              >
+              <span className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-0 -rotate-90" : "opacity-100 rotate-0"}`}>
                 <Menu className="w-4 h-4" />
               </span>
             </button>
@@ -177,7 +209,6 @@ export function Navbar() {
         }`}
         style={{ background: "var(--card-bg)", borderLeft: "1px solid var(--border)" }}
       >
-
         <div className="flex items-center justify-between p-5 border-b border-border">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
@@ -193,29 +224,35 @@ export function Navbar() {
           </button>
         </div>
 
-
+        {/* Mobile nav links */}
         <nav className="p-4 space-y-1">
-          {visibleLinks.map(({ href, label, icon: Icon }) => {
+          {visibleLinks.map(({ href, label, icon: Icon, adminOnly }) => {
             const active = pathname.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  adminOnly
+                    ? active
+                      ? "bg-amber-500/10 text-amber-600"
+                      : "text-amber-600/70 hover:text-amber-600 hover:bg-amber-500/10"
+                    : active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
-                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                {active && (
+                  <span className={`ml-auto w-1.5 h-1.5 rounded-full ${adminOnly ? "bg-amber-500" : "bg-primary"}`} />
+                )}
               </Link>
             );
           })}
         </nav>
 
-
+        {/* Mobile bottom user section */}
         <div className="absolute bottom-0 inset-x-0 p-4 border-t border-border space-y-2">
           {user ? (
             <>
@@ -223,9 +260,16 @@ export function Navbar() {
                 <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
                   <User className="w-3.5 h-3.5 text-primary" />
                 </div>
-                <span className="text-muted-foreground truncate">
-                  {user.user_metadata?.full_name ?? user.email?.split("@")[0]}
-                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-muted-foreground truncate text-xs">
+                    {user.user_metadata?.full_name ?? user.email?.split("@")[0]}
+                  </span>
+                  {isAdmin && (
+                    <span className="text-amber-600 text-[10px] font-semibold uppercase tracking-wide">
+                      Administrator
+                    </span>
+                  )}
+                </div>
               </div>
               <button
                 onClick={handleLogout}

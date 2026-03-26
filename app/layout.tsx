@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { NavbarServer } from "@/components/layout/NavbarServer";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -39,7 +40,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <Providers>
-          <Navbar />
+          <NavbarServer />
           <main className="pt-16">{children}</main>
           <Footer />
           <Toaster

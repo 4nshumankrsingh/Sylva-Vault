@@ -1,5 +1,6 @@
 "use client";
 
+import type { UserResponse } from "@supabase/supabase-js";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -67,8 +68,8 @@ export default function SubscribePage() {
   const cancelled = searchParams.get("cancelled") === "true";
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data.user);
+    supabase.auth.getUser().then((res: UserResponse) => {
+      setIsLoggedIn(!!res.data?.user);
       setAuthCheck(false);
     });
   }, []);
