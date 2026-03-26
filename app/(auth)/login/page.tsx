@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { TreePine, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const router = useRouter();
   const supabase = createClient();
 
   const [email,        setEmail]        = useState("");
@@ -21,7 +19,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError(error.message);
@@ -29,8 +27,17 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    // Read role from user metadata (synced by SQL query you ran earlier)
+    const role = data.user?.user_metadata?.role ?? "PUBLIC";
+
+    // Full hard redirect — ensures session cookie is fully committed
+    // before the next page loads and middleware checks it
+    if (role === "ADMIN") {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = "/dashboard";
+    }
+    // Note: do NOT setLoading(false) here — keep spinner showing during redirect
   }
 
   return (
@@ -60,7 +67,8 @@ export default function LoginPage() {
       </div>
 
       {/* Card */}
-      <div className="bg-card border border-border rounded-2xl p-7 shadow-xl"
+      <div
+        className="bg-card border border-border rounded-2xl p-7 shadow-xl"
         style={{ boxShadow: "0 4px 24px rgba(10,122,77,0.08), 0 1px 3px rgba(0,0,0,0.05)" }}
       >
         {error && (
@@ -137,7 +145,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-
 
       <p className="text-center text-xs text-muted-foreground">
         Secured with Supabase Auth · Data encrypted at rest
