@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { prisma } from "@/lib/prisma";
 import { ScoreEntryForm } from "@/components/forms/ScoreEntryForm";
 import { CharitySelector } from "@/components/forms/CharitySelector";
+import { WinningsSection } from "@/components/dashboard/WinningsSection";
 import {
   Trophy,
   Heart,
@@ -24,7 +25,11 @@ async function getDashboardData(supabaseId: string) {
       subscription:     true,
       scores:           { orderBy: { datePlayed: "desc" }, take: 5 },
       charitySelection: { include: { charity: true } },
-      winnings:         { include: { draw: true }, orderBy: { createdAt: "desc" }, take: 5 },
+      winnings: {
+        include: { draw: { select: { month: true, year: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      },
     },
   });
 }
@@ -236,38 +241,15 @@ export default async function DashboardPage() {
               <h2 className="font-display font-semibold text-foreground">Winnings</h2>
             </div>
             <div className="rule-gradient" />
-
-            {dbUser.winnings.length === 0 ? (
-              <div className="text-center py-6 space-y-2">
-                <Trophy className="w-8 h-8 text-muted-foreground/30 mx-auto" />
-                <p className="text-sm text-muted-foreground">No winnings yet — keep playing!</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {dbUser.winnings.map((w) => (
-                  <div key={w.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border bg-card">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{w.matchCount}-Number Match</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(w.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-primary">£{w.prizeAmount.toFixed(2)}</p>
-                      <span
-                        className="text-xs font-medium px-2 py-0.5 rounded-full"
-                        style={{
-                          color:      w.paymentStatus === "PAID" ? "#0a7c4d" : "#f59e0b",
-                          background: w.paymentStatus === "PAID" ? "rgba(10,122,77,0.1)" : "rgba(245,158,11,0.1)",
-                        }}
-                      >
-                        {w.paymentStatus}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <WinningsSection winnings={dbUser.winnings.map(w => ({
+              id:                 w.id,
+              matchCount:         w.matchCount,
+              prizeAmount:        w.prizeAmount,
+              paymentStatus:      w.paymentStatus,
+              verificationStatus: w.verificationStatus,
+              proofUrl:           w.proofUrl,
+              draw:               { month: w.draw.month, year: w.draw.year },
+            }))} />
           </div>
         </div>
 

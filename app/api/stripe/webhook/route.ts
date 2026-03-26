@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { sendWelcomeEmail } from "@/lib/actions/notifications";
+
 
 export const runtime = "nodejs";
 
@@ -94,6 +96,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     where: { id: userId },
     data:  { role: "SUBSCRIBER" },
   });
+
+  // Send welcome email
+  const welcomeUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true, name: true },
+  });
+  if (welcomeUser) {
+    sendWelcomeEmail({
+      to:       welcomeUser.email,
+      userName: welcomeUser.name ?? welcomeUser.email.split("@")[0],
+      plan,
+    }).catch(console.error);
+  }
 }
 
 async function handleSubscriptionUpdated(sub: Stripe.Subscription) {
