@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: {
@@ -41,6 +42,17 @@ export default function RootLayout({
           <Navbar />
           <main className="pt-16">{children}</main>
           <Footer />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background:  "var(--card-bg)",
+                border:      "1px solid var(--border)",
+                color:       "var(--fg)",
+                fontFamily:  "var(--font-sans)",
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>

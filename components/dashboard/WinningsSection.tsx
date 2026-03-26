@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { Trophy, Upload, CheckCircle2, Clock, XCircle, Loader2, FileImage } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { uploadProofAction } from "@/lib/actions/winners";
+import { toast } from "sonner";
 
 interface Winning {
   id: string;
@@ -22,21 +23,27 @@ interface WinningsSectionProps {
 function VerificationBadge({ status }: { status: string }) {
   if (status === "APPROVED")
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-        style={{ color: "#0a7c4d", background: "rgba(10,122,77,0.1)" }}>
+      <span
+        className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+        style={{ color: "#0a7c4d", background: "rgba(10,122,77,0.1)" }}
+      >
         <CheckCircle2 className="w-3 h-3" /> Approved
       </span>
     );
   if (status === "REJECTED")
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-        style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)" }}>
+      <span
+        className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+        style={{ color: "#ef4444", background: "rgba(239,68,68,0.1)" }}
+      >
         <XCircle className="w-3 h-3" /> Rejected
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-      style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)" }}>
+    <span
+      className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+      style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)" }}
+    >
       <Clock className="w-3 h-3" /> Pending Verification
     </span>
   );
@@ -45,14 +52,18 @@ function VerificationBadge({ status }: { status: string }) {
 function PaymentBadge({ status }: { status: string }) {
   if (status === "PAID")
     return (
-      <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-        style={{ color: "#00b4d8", background: "rgba(0,180,216,0.1)" }}>
+      <span
+        className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+        style={{ color: "#00b4d8", background: "rgba(0,180,216,0.1)" }}
+      >
         <CheckCircle2 className="w-3 h-3" /> Paid
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-      style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)" }}>
+    <span
+      className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+      style={{ color: "#f59e0b", background: "rgba(245,158,11,0.1)" }}
+    >
       <Clock className="w-3 h-3" /> Payment Pending
     </span>
   );
@@ -60,8 +71,7 @@ function PaymentBadge({ status }: { status: string }) {
 
 function ProofUploader({ winnerId }: { winnerId: string }) {
   const [uploading, setUploading] = useState(false);
-  const [error, setError]         = useState<string | null>(null);
-  const [success, setSuccess]     = useState(false);
+  const [uploaded,  setUploaded]  = useState(false);
   const fileRef                   = useRef<HTMLInputElement>(null);
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -69,22 +79,28 @@ function ProofUploader({ winnerId }: { winnerId: string }) {
     if (!file) return;
 
     setUploading(true);
-    setError(null);
+    const toastId = toast.loading("Uploading proof...");
 
     const formData = new FormData();
     formData.append("proof", file);
 
     try {
       await uploadProofAction(winnerId, formData);
-      setSuccess(true);
+      setUploaded(true);
+      toast.success("Proof uploaded — your claim is under review.", {
+        id: toastId,
+      });
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      toast.error(
+        err instanceof Error ? err.message : "Upload failed. Please try again.",
+        { id: toastId }
+      );
     } finally {
       setUploading(false);
     }
   }
 
-  if (success) {
+  if (uploaded) {
     return (
       <div className="flex items-center gap-2 text-xs text-primary">
         <CheckCircle2 className="w-3.5 h-3.5" />
@@ -109,14 +125,12 @@ function ProofUploader({ winnerId }: { winnerId: string }) {
         onClick={() => fileRef.current?.click()}
         className="h-7 text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/5"
       >
-        {uploading ? (
-          <Loader2 className="w-3 h-3 animate-spin" />
-        ) : (
-          <Upload className="w-3 h-3" />
-        )}
+        {uploading
+          ? <Loader2 className="w-3 h-3 animate-spin" />
+          : <Upload className="w-3 h-3" />
+        }
         {uploading ? "Uploading..." : "Upload Proof"}
       </Button>
-      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
     </div>
   );
 }
@@ -148,7 +162,6 @@ export function WinningsSection({ winnings }: WinningsSectionProps) {
             key={w.id}
             className="p-4 rounded-xl border border-border bg-card space-y-3"
           >
-            {/* Top row */}
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold text-foreground">
@@ -161,13 +174,11 @@ export function WinningsSection({ winnings }: WinningsSectionProps) {
               </p>
             </div>
 
-            {/* Status row */}
             <div className="flex items-center gap-2 flex-wrap">
               <VerificationBadge status={w.verificationStatus} />
               <PaymentBadge status={w.paymentStatus} />
             </div>
 
-            {/* Proof section */}
             {w.proofUrl ? (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <FileImage className="w-3.5 h-3.5 text-primary" />
@@ -182,13 +193,12 @@ export function WinningsSection({ winnings }: WinningsSectionProps) {
               </div>
             ) : null}
 
-            {/* Rejection notice */}
             {w.verificationStatus === "REJECTED" && (
               <div
                 className="flex items-start gap-2 p-3 rounded-lg text-xs"
                 style={{
                   background: "rgba(239,68,68,0.06)",
-                  border: "1px solid rgba(239,68,68,0.2)",
+                  border:     "1px solid rgba(239,68,68,0.2)",
                 }}
               >
                 <XCircle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" />
