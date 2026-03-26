@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { TreePine, Mail, Lock, Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase";
@@ -14,35 +15,45 @@ export default function LoginPage() {
   const [loading,      setLoading]      = useState(false);
   const [error,        setError]        = useState<string | null>(null);
 
+  // Listen for session — fires AFTER cookie is fully written
+  // This is the only reliable way to know when auth is truly complete
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
+        if (event === "SIGNED_IN" && session) {
+          const role = session.user?.user_metadata?.role ?? "PUBLIC";
+          if (role === "ADMIN") {
+            window.location.replace("/admin");
+          } else {
+            window.location.replace("/dashboard");
+          }
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       setError(error.message);
       setLoading(false);
-      return;
     }
-
-    // Read role from user metadata (synced by SQL query you ran earlier)
-    const role = data.user?.user_metadata?.role ?? "PUBLIC";
-
-    // Full hard redirect — ensures session cookie is fully committed
-    // before the next page loads and middleware checks it
-    if (role === "ADMIN") {
-      window.location.href = "/admin";
-    } else {
-      window.location.href = "/dashboard";
-    }
-    // Note: do NOT setLoading(false) here — keep spinner showing during redirect
+    // On success: do NOT redirect here.
+    // onAuthStateChange above will fire with SIGNED_IN and handle the redirect
+    // after the session cookie is fully committed.
   }
 
   return (
     <div className="space-y-6 animate-fade-up">
-      {/* Back link */}
       <Link
         href="/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
@@ -51,7 +62,6 @@ export default function LoginPage() {
         Back to home
       </Link>
 
-      {/* Logo */}
       <div className="space-y-1">
         <div className="flex items-center gap-2.5 mb-4">
           <div
@@ -60,27 +70,36 @@ export default function LoginPage() {
           >
             <TreePine className="w-5 h-5 text-white" strokeWidth={1.8} />
           </div>
-          <span className="text-xl font-display font-semibold text-foreground">Sylva Vault</span>
+          <span className="text-xl font-display font-semibold text-foreground">
+            Sylva Vault
+          </span>
         </div>
-        <h1 className="text-2xl font-display font-bold text-foreground">Welcome back</h1>
-        <p className="text-sm text-muted-foreground">Sign in to your account to continue</p>
+        <h1 className="text-2xl font-display font-bold text-foreground">
+          Welcome back
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Sign in to your account to continue
+        </p>
       </div>
 
-      {/* Card */}
       <div
         className="bg-card border border-border rounded-2xl p-7 shadow-xl"
         style={{ boxShadow: "0 4px 24px rgba(10,122,77,0.08), 0 1px 3px rgba(0,0,0,0.05)" }}
       >
         {error && (
           <div className="mb-5 p-3.5 rounded-xl bg-destructive/8 border border-destructive/20 text-destructive text-sm flex items-start gap-2.5">
-            <span className="mt-0.5 w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center shrink-0 text-xs font-bold">!</span>
+            <span className="mt-0.5 w-4 h-4 rounded-full bg-destructive/20 flex items-center justify-center shrink-0 text-xs font-bold">
+              !
+            </span>
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground">Email address</label>
+            <label className="text-sm font-medium text-foreground">
+              Email address
+            </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               <input
@@ -90,15 +109,25 @@ export default function LoginPage() {
                 required
                 placeholder="you@example.com"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:border-primary transition-all text-sm"
-                style={{ "--tw-ring-color": "color-mix(in srgb, #0a7c4d 25%, transparent)" } as React.CSSProperties}
+                style={
+                  {
+                    "--tw-ring-color":
+                      "color-mix(in srgb, #0a7c4d 25%, transparent)",
+                  } as React.CSSProperties
+                }
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground">Password</label>
-              <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+              <label className="text-sm font-medium text-foreground">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-primary hover:underline"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -117,7 +146,11 @@ export default function LoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -126,10 +159,15 @@ export default function LoginPage() {
             type="submit"
             disabled={loading}
             className="w-full py-2.5 rounded-xl bg-primary text-white font-medium hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2"
-            style={{ boxShadow: "0 4px 12px color-mix(in srgb, #0a7c4d 30%, transparent)" }}
+            style={{
+              boxShadow: "0 4px 12px color-mix(in srgb, #0a7c4d 30%, transparent)",
+            }}
           >
             {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Signing in...</>
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing in...
+              </>
             ) : (
               "Sign in"
             )}
@@ -139,7 +177,10 @@ export default function LoginPage() {
         <div className="mt-5 pt-5 border-t border-border text-center">
           <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
+            <Link
+              href="/signup"
+              className="text-primary font-medium hover:underline"
+            >
               Create one free
             </Link>
           </p>
