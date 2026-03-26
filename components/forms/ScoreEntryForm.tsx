@@ -2,29 +2,41 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Calendar, Target, Loader2, AlertCircle, CheckCircle2, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Calendar,
+  Target,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Trash2,
+  Lock,
+  Trophy,
+} from "lucide-react";
 import { addScore, deleteScore } from "@/lib/actions/scores";
 
 interface Score {
-  id:         string;
-  value:      number;
+  id: string;
+  value: number;
   datePlayed: Date;
 }
 
 interface Props {
   scores: Score[];
-  canAdd: boolean;
+  canAdd: boolean; // true only for ACTIVE subscribers
 }
 
 export function ScoreEntryForm({ scores, canAdd }: Props) {
   const router = useRouter();
 
-  const [value,    setValue]    = useState<string>("");
-  const [date,     setDate]     = useState<string>(new Date().toISOString().split("T")[0]);
-  const [loading,  setLoading]  = useState(false);
+  const [value, setValue] = useState<string>("");
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [error,    setError]    = useState<string | null>(null);
-  const [success,  setSuccess]  = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -70,14 +82,18 @@ export function ScoreEntryForm({ scores, canAdd }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Your Scores</h3>
-          <span className="text-xs text-muted-foreground">{scores.length}/5 entered</span>
+          <span className="text-xs text-muted-foreground">
+            {scores.length}/5 entered
+          </span>
         </div>
 
         {scores.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 border border-dashed border-border rounded-2xl text-center gap-2">
             <Target className="w-8 h-8 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">No scores yet</p>
-            <p className="text-xs text-muted-foreground/60">Add your first Stableford score below</p>
+            <p className="text-xs text-muted-foreground/60">
+              Add your first Stableford score below
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -88,14 +104,20 @@ export function ScoreEntryForm({ scores, canAdd }: Props) {
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-display font-bold text-primary">{score.value}</span>
+                  <span className="text-sm font-display font-bold text-primary">
+                    {score.value}
+                  </span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm font-medium text-foreground">{score.value} pts</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {score.value} pts
+                    </span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(score.datePlayed).toLocaleDateString("en-GB", {
-                        day: "numeric", month: "short", year: "numeric",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
                       })}
                     </span>
                   </div>
@@ -106,23 +128,27 @@ export function ScoreEntryForm({ scores, canAdd }: Props) {
                     />
                   </div>
                 </div>
-                <button
-                  onClick={() => handleDelete(score.id)}
-                  disabled={deleting === score.id}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-all duration-200 shrink-0"
-                >
-                  {deleting === score.id
-                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : <Trash2 className="w-3.5 h-3.5" />
-                  }
-                </button>
+                {/* Only show delete button if subscriber can manage scores */}
+                {canAdd && (
+                  <button
+                    onClick={() => handleDelete(score.id)}
+                    disabled={deleting === score.id}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-all duration-200 shrink-0"
+                  >
+                    {deleting === score.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Add form */}
+      {/* Add form — shown only to active subscribers */}
       {canAdd ? (
         <form onSubmit={handleAdd} className="space-y-3">
           <div className="flex gap-3">
@@ -154,36 +180,67 @@ export function ScoreEntryForm({ scores, canAdd }: Props) {
               type="submit"
               disabled={loading}
               className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all shrink-0"
-              style={{ boxShadow: "0 2px 8px color-mix(in srgb, var(--primary) 30%, transparent)" }}
+              style={{
+                boxShadow:
+                  "0 2px 8px color-mix(in srgb, var(--primary) 30%, transparent)",
+              }}
             >
-              {loading
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <><Plus className="w-4 h-4" />Add</>
-              }
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <Plus className="w-4 h-4" />
+                  Add
+                </>
+              )}
             </button>
           </div>
 
           {error && (
             <p className="flex items-center gap-1.5 text-xs text-destructive">
-              <AlertCircle className="w-3.5 h-3.5" />{error}
+              <AlertCircle className="w-3.5 h-3.5" />
+              {error}
             </p>
           )}
           {success && (
             <p className="flex items-center gap-1.5 text-xs text-primary animate-fade-in">
-              <CheckCircle2 className="w-3.5 h-3.5" />Score added!
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Score added!
               {scores.length >= 5 && " Oldest score removed automatically."}
             </p>
           )}
 
           <p className="text-xs text-muted-foreground">
-            Only your 5 most recent scores are kept. Adding a 6th removes the oldest automatically.
+            Only your 5 most recent scores are kept. Adding a 6th removes the
+            oldest automatically.
           </p>
         </form>
       ) : (
-        <div className="p-4 rounded-xl border border-border bg-muted text-center space-y-2">
-          <p className="text-sm text-muted-foreground">Subscribe to start entering scores and draws.</p>
-          <a href="/subscribe" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-            View plans →
+        /* ── Locked state for non-subscribers ─────────────────────────────── */
+        <div className="rounded-2xl border border-dashed border-border bg-muted/40 p-8 text-center space-y-4">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+            <Lock className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-1">
+              Subscribers Only
+            </h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Score entry and draw participation are available to active
+              subscribers. Upgrade your plan to start tracking your Stableford
+              scores and entering monthly prize draws.
+            </p>
+          </div>
+          <a
+            href="/subscribe"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:brightness-110 transition-all hover:-translate-y-0.5"
+            style={{
+              boxShadow:
+                "0 2px 10px color-mix(in srgb, var(--primary) 30%, transparent)",
+            }}
+          >
+            <Trophy className="w-4 h-4" />
+            View Plans
           </a>
         </div>
       )}

@@ -19,7 +19,9 @@ export async function middleware(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          response = NextResponse.next({ request: { headers: request.headers } });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );
@@ -28,24 +30,58 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session — MUST be called in middleware to keep session alive
-  const { data: { user } } = await supabase.auth.getUser();
+  // MUST call getUser() to refresh session — do not remove
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
 
-  // ── Protect /admin/* routes ──────────────────────────────────────────────
-  // If not logged in, send to login
-  if (pathname.startsWith("/admin") && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // Read role from Supabase user metadata (set during signup & role changes)
+  const role: string = user?.user_metadata?.role ?? "PUBLIC";
+
+  // ── Skip middleware for auth callback ────────────────────────────────────
+  if (pathname.startsWith("/auth/callback")) {
+    return response;
   }
 
-  // ── Protect /dashboard and /subscribe ───────────────────────────────────
-  if ((pathname.startsWith("/dashboard") || pathname.startsWith("/subscribe")) && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  // ── Not logged in — protect private routes ───────────────────────────────
+  if (!user) {
+    if (
+      pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/subscribe") ||
+      pathname.startsWith("/admin")
+    ) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return response;
   }
 
-  // ── Redirect logged-in users away from auth pages ───────────────────────
-  if ((pathname.startsWith("/login") || pathname.startsWith("/signup")) && user) {
+  // ── User IS logged in ─────────────────────────────────────────────────────
+
+  // Redirect away from auth pages
+  if (pathname === "/login" || pathname === "/signup") {
+    if (role === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // ADMIN: can only access /admin/* — block from /dashboard and /subscribe
+  if (role === "ADMIN") {
+    if (
+      pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/subscribe")
+    ) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    return response;
+  }
+
+  // NON-ADMIN: block from /admin/*
+  if (pathname.startsWith("/admin")) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
@@ -54,7 +90,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Run on all routes except static files and Next internals
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
