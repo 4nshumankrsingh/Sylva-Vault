@@ -66,7 +66,7 @@ export function Footer() {
 
             <div className="flex items-center gap-3 pt-1">
               <a
-                href="https://github.com/4nshumankrsingh"
+                href="https://github.com/4nshumankrsingh/Sylva-Vault"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="GitHub"

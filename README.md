@@ -14,12 +14,12 @@ https://sylva-vault.vercel.app
 ## Test Credentials
 
 ### Subscriber Account
-- Email: `subscriber@sylvavault.com`
-- Password: `TestSubscriber123!`
+- Email: `xxxxxsincexx04xx@gmail.com`
+- Password: `rsbbxx0x!`
 
 ### Admin Account
-- Email: `admin@sylvavault.com`
-- Password: `TestAdmin123!`
+- Email: `xxxxxsingh_ixx@xxxs.edu`
+- Password: `rsbbxx0x`
 
 ---
 
@@ -83,6 +83,9 @@ Logo icon: TreePine from Lucide React.
 - Admin reviews and approves or rejects
 - Payment states: Pending → Paid
 - Email notifications at each step via Resend
+
+> Email notifications are integrated via Resend and configured in test mode.
+> In production, a custom verified domain would replace the test sender address.
 
 ### Section 10 — User Dashboard
 - Subscription status with renewal date
@@ -167,15 +170,16 @@ sylva-vault/
 ├── app/
 │   ├── (admin)/
 │   │   ├── layout.tsx                    # Admin layout with role guard
-│   │   ├── page.tsx                      # Reports and analytics
-│   │   ├── users/
-│   │   │   └── page.tsx                  # User management
-│   │   ├── draws/
-│   │   │   └── page.tsx                  # Draw management
-│   │   ├── charities/
-│   │   │   └── page.tsx                  # Charity management
-│   │   └── winners/
-│   │       └── page.tsx                  # Winners management
+│   │   └── admin/
+│   │       ├── page.tsx                  # Reports and analytics
+│   │       ├── users/
+│   │       │   └── page.tsx              # User management
+│   │       ├── draws/
+│   │       │   └── page.tsx              # Draw management
+│   │       ├── charities/
+│   │       │   └── page.tsx              # Charity management
+│   │       └── winners/
+│   │           └── page.tsx              # Winners management
 │   ├── (auth)/
 │   │   ├── layout.tsx
 │   │   ├── login/
