@@ -56,11 +56,11 @@ export function Footer() {
 
 
             <a
-              href="mailto:kumar_singh_iot@vips.edu"
+              href="mailto:4nshumankrsingh@gmail.com"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-muted text-sm text-muted-foreground hover:text-primary hover:border-primary/30 transition-all duration-200 group"
             >
               <Mail className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
-              kumar_singh_iot@vips.edu
+              4nshumankrsingh@gmail.com
             </a>
 
 
@@ -75,7 +75,7 @@ export function Footer() {
                 <GithubIcon />
               </a>
               <a
-                href="https://www.linkedin.com/in/anshuman-kumar-singh-078b01316/"
+                href="https://www.linkedin.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
