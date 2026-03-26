@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Trophy, Calendar, TrendingUp, Users, ChevronRight } from "lucide-react";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Monthly Draws" };
 
 const MONTHS = [

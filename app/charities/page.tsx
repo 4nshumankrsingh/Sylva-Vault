@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Heart, ExternalLink, Star, Calendar } from "lucide-react";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Charities" };
 
 export default async function CharitiesPage() {
