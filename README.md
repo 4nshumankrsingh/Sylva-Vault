@@ -14,12 +14,27 @@ https://sylva-vault.vercel.app
 ## Test Credentials
 
 ### Subscriber Account
-- Email: `xxxxxsincexx04xx@gmail.com`
-- Password: `rsbbxx0x!`
+- Email: `twin.peaks.s1.1990@gmail.com`
+- Password: `abcdefgh`
 
 ### Admin Account
-- Email: `xxxxxsingh_ixx@xxxs.edu`
-- Password: `rsbbxx0x`
+- Email: `4nshumankrsingh@gmail.com`
+- Password: `abcdefgh`
+
+---
+
+## Role System
+
+| Role       | Access                                                                 |
+|------------|------------------------------------------------------------------------|
+| PUBLIC     | Homepage, charities directory, draws history                           |
+| SUBSCRIBER | Full player dashboard — scores, charity, draws, winnings               |
+| ADMIN      | Admin control panel only — users, draws, charities, winners, reports   |
+
+> **Note:** Admins manage the platform and do not participate as players.
+> To access the player dashboard and enter draws, an admin must also hold
+> an active subscriber account (separate account with SUBSCRIBER role).
+> This is by design — admin and player roles are intentionally separated.
 
 ---
 
@@ -31,7 +46,7 @@ https://sylva-vault.vercel.app
 | Database     | Supabase (PostgreSQL) + Prisma ORM              |
 | Auth         | Supabase Auth (JWT, HTTPS enforced)             |
 | Payments     | Stripe — GBP, Monthly £9.99 / Yearly £99.99    |
-| Email        | Resend                                          |
+| Email        | Resend (test mode — see note below)             |
 | Styling      | Tailwind CSS + shadcn/ui + Lucide React         |
 | Deployment   | Vercel (new account, new Supabase project)      |
 
@@ -42,12 +57,26 @@ Logo icon: TreePine from Lucide React.
 
 ---
 
+## Email Notifications
+
+Email notifications are integrated via Resend and trigger on:
+- Draw results published
+- Winner verification status updates
+- Payout marked as completed
+
+> Resend is running in **test mode**. Free-tier Resend does not allow custom
+> domain verification for publicly deployed apps. In production, a verified
+> custom domain would replace the test sender address and enable full delivery.
+
+---
+
 ## Features Delivered (PRD Coverage)
 
 ### Section 03 — User Roles
 - PUBLIC: browse homepage, charities, draws
 - SUBSCRIBER: dashboard, scores, charity, draw entries, winnings, proof upload
 - ADMIN: full control panel — users, draws, charities, winners, reports
+- Admins are platform managers and do not have access to the player dashboard
 
 ### Section 04 — Subscription & Payment
 - Stripe Checkout for Monthly and Yearly plans (GBP)
@@ -60,7 +89,7 @@ Logo icon: TreePine from Lucide React.
 - Rolling last-5 Stableford scores (1–45 range)
 - New score auto-replaces oldest when at capacity
 - Date recorded per score, displayed reverse chronologically
-- Subscribers only — locked for non-subscribers
+- Subscribers only — locked with clear upgrade prompt for non-subscribers
 
 ### Section 06 & 07 — Draw & Prize Pool
 - Random draw and algorithmic draw (weighted by score frequency)
@@ -83,9 +112,6 @@ Logo icon: TreePine from Lucide React.
 - Admin reviews and approves or rejects
 - Payment states: Pending → Paid
 - Email notifications at each step via Resend
-
-> Email notifications are integrated via Resend and configured in test mode.
-> In production, a custom verified domain would replace the test sender address.
 
 ### Section 10 — User Dashboard
 - Subscription status with renewal date
@@ -111,9 +137,11 @@ Logo icon: TreePine from Lucide React.
 ### Section 13 — Technical
 - Mobile-first responsive design
 - Supabase Auth with middleware-level route protection
-- Email notifications: welcome, draw results, verification, payment
+- Role-based access control via JWT metadata
+- Email notifications: draw results, verification, payment
 - Security headers via next.config.mjs
 - Optimised images via Next.js Image component
+- Prisma + PgBouncer connection pooling configured for Vercel serverless
 
 ### Section 15 — Mandatory Deliverables
 - Live deployed URL on new Vercel account
@@ -125,9 +153,10 @@ Logo icon: TreePine from Lucide React.
 ---
 
 ## Local Setup
+
 ```bash
 # 1. Clone
-git clone https://github.com/YOUR_USERNAME/sylva-vault.git
+git clone https://github.com/4nshumankrsingh/Sylva-Vault.git
 cd sylva-vault
 
 # 2. Install
@@ -147,11 +176,13 @@ npm run dev
 ---
 
 ## Environment Variables
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 DATABASE_URL=
+DIRECT_URL=
 STRIPE_SECRET_KEY=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_WEBHOOK_SECRET=
@@ -165,6 +196,7 @@ NEXT_PUBLIC_APP_URL=
 ---
 
 ## Folder Structure
+
 ```
 sylva-vault/
 ├── app/
@@ -244,50 +276,33 @@ sylva-vault/
 │   │   ├── Navbar.tsx
 │   │   └── ThemeToggle.tsx
 │   ├── ui/                               # shadcn/ui components
-│   │   ├── badge.tsx
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── dialog.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── input.tsx
-│   │   ├── label.tsx
-│   │   ├── select.tsx
-│   │   ├── switch.tsx
-│   │   ├── table.tsx
-│   │   ├── tabs.tsx
-│   │   └── textarea.tsx
 │   └── providers.tsx                     # ThemeProvider wrapper
 ├── lib/
 │   ├── actions/
 │   │   ├── admin/
-│   │   │   ├── users.ts                  # Admin user actions
-│   │   │   ├── draws.ts                  # Admin draw actions
-│   │   │   ├── charities.ts              # Admin charity actions
-│   │   │   └── winners.ts                # Admin winner verify + pay
-│   │   ├── notifications.ts              # Resend email actions
-│   │   ├── winners.ts                    # User proof upload action
-│   │   ├── scores.ts                     # Score CRUD actions
-│   │   └── charity.ts                    # Charity selection actions
+│   │   │   ├── users.ts
+│   │   │   ├── draws.ts
+│   │   │   ├── charities.ts
+│   │   │   └── winners.ts
+│   │   ├── notifications.ts
+│   │   ├── winners.ts
+│   │   ├── scores.ts
+│   │   └── charity.ts
 │   ├── email/
-│   │   └── templates.ts                  # HTML email templates
-│   ├── drawEngine.ts                     # Draw logic + prize pool
-│   ├── prisma.ts                         # Prisma client singleton
-│   ├── resend.ts                         # Resend client
-│   ├── stripe.ts                         # Stripe client
-│   ├── supabase.ts                       # Supabase browser client
-│   ├── supabase-server.ts                # Supabase server + service clients
+│   │   └── templates.ts
+│   ├── drawEngine.ts
+│   ├── prisma.ts
+│   ├── resend.ts
+│   ├── stripe.ts
+│   ├── supabase.ts
+│   ├── supabase-server.ts
 │   └── utils.ts
 ├── prisma/
-│   └── schema.prisma                     # Full database schema
+│   └── schema.prisma
 ├── types/
 │   └── index.ts
-├── .env.local                            # Never committed
-├── components.json                       # shadcn config
-├── middleware.ts                         # Route protection
-├── next.config.mjs                       # Security headers + image domains
-├── package.json
-├── prisma.config.ts
-├── README.md
+├── middleware.ts
+├── next.config.mjs
 ├── tailwind.config.ts
 └── tsconfig.json
 ```
@@ -296,15 +311,15 @@ sylva-vault/
 
 ## PRD Testing Checklist
 
-- User signup and login
-- Subscription flow — monthly and yearly
-- Score entry with 5-score rolling logic
-- Draw system simulation and official publish
-- Charity selection and contribution percentage
-- Winner verification flow and proof upload
-- Payout tracking — Pending to Paid
-- User dashboard — all modules functional
-- Admin panel — full control and usability
-- Data accuracy across all modules
-- Responsive design on mobile and desktop
-- Error handling and edge cases
+- [x] User signup and login
+- [x] Subscription flow — monthly and yearly
+- [x] Score entry with 5-score rolling logic
+- [x] Draw system simulation and official publish
+- [x] Charity selection and contribution percentage
+- [x] Winner verification flow and proof upload
+- [x] Payout tracking — Pending to Paid
+- [x] User dashboard — all modules functional
+- [x] Admin panel — full control and usability
+- [x] Data accuracy across all modules
+- [x] Responsive design on mobile and desktop
+- [x] Error handling and edge cases
